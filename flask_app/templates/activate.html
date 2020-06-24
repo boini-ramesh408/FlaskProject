@@ -1,3 +1,9 @@
-Hiii {{ email }}
-To active your account, please click on this link:
-{{ link }}
+
+
+
+{% autoescape off %}
+Hi {{ username }},
+Please click on the link to confirm your registration,
+{{url}}
+<!--{{ domain }}{% url 'verify'  token=token %}-->
+{% endautoescape %}
