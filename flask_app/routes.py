@@ -58,7 +58,7 @@ class Register(Resource):
         try:
             pdb.set_trace()
             details = TokenGenaration.decode_token(self, token)
-            email = details['mail']
+            # email = details['mail']
             user_id=details['id']
             user = User.query.filter_by(id=user_id).first()
             user.active = 1
@@ -84,11 +84,10 @@ class Login(Resource):
             password = form.password.data
             user = User.query.filter_by(email=email).first()
             if user.active==1:
-                user_id = user.id
+                # user_id = user.id
             flash('login successfully')
             return jsonify({'status': True, 'message': 'login suessfull ', 'data': []})
         except:
             return jsonify({'status': False, 'message': 'login failed'})
-
 
 api.add_resource(Login, '/login')
