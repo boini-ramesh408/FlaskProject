@@ -3,7 +3,7 @@ import pdb
 import string
 from random import choices
 
-from flask import jsonify, render_template, url_for, flash
+from flask import jsonify, render_template, url_for, flash, session
 from flask_mail import Message, Mail
 from flask_restful import Resource, Api
 from flask_app import db, app
@@ -33,7 +33,7 @@ smd = {
     'message': 'registration sucessfull',
     'data': [],
 }
-
+# sachinlokesh05
 
 class Register(Resource):
 
@@ -48,6 +48,7 @@ class Register(Resource):
             email = form.email.data
             password = form.password.data
             status = validate_credentials(password, email)
+
             if status:
                 user = User(username=username, email=email, password=password)
                 db.session.add(user)
@@ -69,7 +70,7 @@ class Register(Resource):
                 return jsonify(smd, status=200)
             else:
 
-                return jsonify({'message': 'enter valid credentials'})
+                return jsonify({'message': 'enter valid credentials',},status=400)
         except:
             return jsonify({'status': False, 'message': 'registration failed'})
 
@@ -110,6 +111,8 @@ class Login(Resource):
             user = User.query.filter_by(email=email).first()
             if user.active == 1:
                 user_id = user.id
+                session['username'] = user.username
+                session["email"] = user.email
                 flash('login successfully')
             return jsonify({'status': 200, 'message': 'login suessfull ', 'data': []})
         except:
@@ -118,9 +121,16 @@ class Login(Resource):
 
 api.add_resource(Login, '/login')
 
-
-class ForgotPasword:
+class Logout(Resource):
     def post(self):
+        session.clear()
+api.add_resource(Logout, '/logout')
+
+class ForgotPasword(Resource):
+
+    def post(self):
+        import pdb
+        pdb.set_trace()
         form = ForgotPasswordForm()
         email = form.email.data
         user = User.query.filter_by(email=email).first()
@@ -139,9 +149,11 @@ class ForgotPasword:
             confirm_password = form.password.data("confirm_password")
             details = TokenGenaration.decode_token(self, token)
             email = details['mail']
+            user = User.query.filter_by(email=email).first()
+
         except:
             return jsonify({'status': False, 'message': 'reset failed'})
 
 
-api.add_resource(ForgotPasword, '/forgot')
-# api.add_resource(ForgotPasword, '/forgot/<string:token>')
+# api.add_resource(ForgotPasword,'/forgot')
+# api.add_resource(ForgotPasword,'/forgot/<string:token>', endpoint='token')

@@ -12,6 +12,7 @@ class TestRegistration:
     #     testdata = json.load(file)
 
     def test_register(self):
+
         # import pdb
         # pdb.set_trace()
         # file = TestCases.testdata[0]["testcase1"]
@@ -30,6 +31,6 @@ class TestRegistration:
         url = 'http://127.0.0.1:5000/register'
         data = {'username': '', 'password': ''}
         response = requests.post(url=url, data=data)
-        assert response.status_code == 404
+        assert response.status_code == 400
 
 
