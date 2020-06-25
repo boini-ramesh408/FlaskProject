@@ -128,19 +128,19 @@ api.add_resource(Logout, '/logout')
 
 class ForgotPasword(Resource):
 
-    def post(self):
-        import pdb
-        pdb.set_trace()
-        form = ForgotPasswordForm()
-        email = form.email.data
-        user = User.query.filter_by(email=email).first()
-        if user:
-            url = os.getenv('Url')
-            token = TokenGenaration.encode_token(self, user)
-            mail_subject = 'link to activate the account'
-            msg = Message(mail_subject, sender=email, recipients=[MAIL_USERNAME])
-            msg.body = f"Click here to activate : {url}/register/{token}"
-            mail.send(msg)
+    # def post(self):
+    #     import pdb
+    #     pdb.set_trace()
+    #     form = ForgotPasswordForm()
+    #     email = form.email.data
+    #     user = User.query.filter_by(email=email).first()
+    #     if user:
+    #         url = os.getenv('Url')
+    #         token = TokenGenaration.encode_token(self, user)
+    #         mail_subject = 'link to activate the account'
+    #         msg = Message(mail_subject, sender=email, recipients=[MAIL_USERNAME])
+    #         msg.body = f"Click here to activate : {url}/register/{token}"
+    #         mail.send(msg)
 
     def put(self, token):
         try:
