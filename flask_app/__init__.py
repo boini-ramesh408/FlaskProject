@@ -12,15 +12,12 @@ import os
 
 from flask import Flask
 from flask_sqlalchemy import SQLAlchemy
-
+from flask_marshmallow import Marshmallow
 
 app = Flask(__name__)
 app.config['SECRET_KEY'] = '4b70b5e6a77a9807c7e0'
 app.config['SQLALCHEMY_DATABASE_URI'] = os.getenv("Flask_SQLALCHEMY_DATABASE_URI")
 db = SQLAlchemy(app)
-
-
-
-
+ma = Marshmallow(app)
 
 from flask_app import routes

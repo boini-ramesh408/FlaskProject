@@ -8,6 +8,7 @@ from flask_app.models import User
 
 
 class RegistrationForm(FlaskForm):
+
     username = StringField('Username', validators=[DataRequired(), Length(min=2, max=20)])
 
     email = StringField('Email', validators=[DataRequired()])
