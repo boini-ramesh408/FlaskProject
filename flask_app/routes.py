@@ -2,6 +2,7 @@ import os
 import pdb
 import flask
 from flask import jsonify, render_template, url_for, flash, session, make_response, request
+from flask_cors import cross_origin, CORS
 from flask_login import login_user, logout_user
 from flask_mail import Message, Mail
 from flask_restful import Resource, Api
@@ -16,10 +17,11 @@ from flask_app.token import TokenGenaration
 from flask_app.validators import validate_credentials
 
 api = Api(app)
+CORS(app)
 MAIL_USERNAME = os.getenv('MAIL_USERNAME')
 MAIL_PASSWORD = os.getenv('MAIL_PASSWORD')
 DATABASE_URL = os.getenv('DATABASE_URL')
-app.config['SQLALCHEMY_DATABASE_URI'] = DATABASE_URL
+# app.config['SQLALCHEMY_DATABASE_URI'] ='mysql://root:ramesh123@localhost/flaskdatabase'
 
 app.config['DEBUG'] = True
 app.config['MAIL_USERNAME'] = MAIL_USERNAME
@@ -39,6 +41,8 @@ smd = {
 }
 
 register_schema = RegisterSerializer()
+
+
 class Register(Resource):
     """
         Registration- class is used for registering the user credentials, and stores th credentials in the database
@@ -48,21 +52,24 @@ class Register(Resource):
        get: here get method is use to get the data from the database,and also activating user for login.
        """
 
+    @cross_origin()
     def post(self, *args, **kwargs):
 
         try:
             pdb.set_trace()
-
 
             # result = user_schema.dumps(user).data
             form = RegistrationForm()
             username = form.username.data
             email = form.email.data
             password = form.password.data
+            confirm_password = form.confirm_password.data
+
+            hashed_password = bcrypt.generate_password_hash(confirm_password)
             status = validate_credentials(password, email)
 
             if status:
-                user = User(username=username, email=email, password=password)
+                user = User(username=username, email=email, password=hashed_password)
                 db.session.add(user)
                 db.session.commit()
                 user = User.query.filter_by(email=email).first()
@@ -74,10 +81,9 @@ class Register(Resource):
                 # link=self.query.filter(short_url=short_url).first()
                 mail_subject = 'link to activate the account'
                 msg = Message(mail_subject, sender=email, recipients=[MAIL_USERNAME])
-                msg.body = f"Click here to activate : {url}/forgot/{token}"
+                msg.body = f"Click here to activate : {url}/register/{token}"
 
                 mail.send(msg)
-
 
                 return jsonify(smd, status=200)
             else:
@@ -96,7 +102,7 @@ class Register(Resource):
 
     def get(self, token, *args, **kwargs):
         try:
-            # pdb.set_trace()
+            pdb.set_trace()
 
             details = TokenGenaration.decode_token(self, token)
             email = details['mail']
@@ -107,12 +113,9 @@ class Register(Resource):
                 user.active = 1
                 db.session.add(user)
                 db.session.commit()
-                result = register_schema.dumps(user).data
-                response = {
-                    'message': result,
-                    'status_code': 200
-                }
-                return jsonify(response)
+                # result = register_schema.dumps(user).data
+
+                return jsonify({'status': True, 'message': 'token activation  success'})
 
             else:
                 return flask.Response(status=400)
@@ -134,6 +137,7 @@ class Login(Resource):
           post: Post API is used to for storing the login credentials in to the database if the user is active
 
           """
+
     def post(self, *args, **kwargs):
         try:
             # pdb.set_trace()
@@ -151,7 +155,7 @@ class Login(Resource):
 
             return jsonify({'status': 200, 'message': 'login suessfull ', 'data': []})
         except:
-           return flask.Response(status=400)
+            return flask.Response(status=400)
 
 
 api.add_resource(Login, '/login')
@@ -168,10 +172,11 @@ class ForgotPasword(Resource):
 
             put:Put Api is used for updating the password in the database
             """
+
     def post(self):
 
         # import pdb
-        # pdb.set_trace()
+        pdb.set_trace()
 
         form = ForgotPasswordForm()
         email = form.email.data
@@ -185,12 +190,11 @@ class ForgotPasword(Resource):
             mail.send(msg)
             return jsonify({'status': 200, 'message': 'login suessfull ', 'data': []})
 
-
     def put(self):
 
-        # pdb.set_trace()
+        pdb.set_trace()
         try:
-            token=request.headers.get('token')
+            token = request.headers.get('token')
             # token1=request.headers['token']
             form = ResetPasswordForm()
 
@@ -200,10 +204,10 @@ class ForgotPasword(Resource):
             email = details['mail']
             user = User.query.filter_by(email=email).first()
 
-            # hashed_password = bcrypt.generate_password_hash(confirm_password).decode('utf-8')
+            hashed_password = bcrypt.generate_password_hash(confirm_password)
             user = User.query.filter_by(username=user.username).first()
             if password == confirm_password:
-                user.password = confirm_password
+                user.password = hashed_password
                 db.session.add(user)
                 db.session.commit()
                 return jsonify({'status': 200, 'message': 'login suessfull ', 'data': []})
@@ -227,8 +231,8 @@ class Logout(Resource):
                """
 
     def post(self):
+        logout_user()
+        return jsonify({'status': 200, 'message': 'reset suessfull ', 'data': []})
 
-       logout_user()
-       return jsonify({'status': 200, 'message': 'login suessfull ', 'data': []})
 
 api.add_resource(Logout, '/logout')
