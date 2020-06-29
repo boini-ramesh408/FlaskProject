@@ -14,3 +14,10 @@ def validate_credentials(password, email):
         # print("Must contain at least one number and one uppercase and lowercase letter, and at least 8 or more "
         #       "characters")
         return False
+
+
+def password_validators(password):
+    if re.match("(?=.*\d)(?=.*[a-z])(?=.*[A-Z]).{8,}", password):
+        return  True
+    else:
+        return  False

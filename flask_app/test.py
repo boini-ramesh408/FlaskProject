@@ -14,14 +14,14 @@ class TestRegistration:
     def test_register(self):
         # file = TestCases.testdata[0]["testcase1"]
         url = 'http://127.0.0.1:5000/register'
-        data = {'username': 'Aasdf', 'password': 'As123456', 'email': 'ramesh@gmail.com'}
+        data = {'username': 'asdcfgg', 'password': 'As123456','confirm_password':'As123456', 'email': 'acsdfgg@gmail.com'}
         response = requests.post(url=url, data=data)
 
         assert response.status_code == 200
 
     def test_register1(self):
         url = 'http://127.0.0.1:5000/register'
-        data = {'username': '', 'password': '', 'email': 'ramesh@gmail.com'}
+        data = {'username': '', 'password': '','confirm_password':'As123456','email': 'ramesh@gmail.com'}
         response = requests.post(url=url, data=data)
         assert response.status_code == 400
 
@@ -36,7 +36,7 @@ class TestLogin:
     def test_login(self):
         # file = TestCases.testdata[0]["testcase1"]
         url = 'http://127.0.0.1:5000/login'
-        data = {'username': 'Aasdf', 'password': 'As123456',}
+        data = {'username': 'Aasdfe', 'password': 'As123456',}
         response = requests.post(url=url, data=data)
 
         assert response.status_code == 200
