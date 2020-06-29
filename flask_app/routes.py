@@ -17,7 +17,8 @@ from flask_app.serializers import RegisterSerializer
 from flask_app.short_url import ShortUrlGenerator
 from flask_app.token import TokenGenaration
 from flask_app.validators import validate_credentials, password_validators
-migrate = Migrate(app,db)
+
+migrate = Migrate(app, db)
 api = Api(app)
 migrate.init_app(app)
 CORS(app)
@@ -56,12 +57,12 @@ class Register(Resource):
        """
 
     @cross_origin()
-    def post(self,*args, **kwargs):
+    def post(self, *args, **kwargs):
 
         try:
-            pdb.set_trace()
+            # pdb.set_trace()
 
-            data=request.data
+            data = request.data
 
             # result = register_schema.dumps(data)
             # username=request.json['username']
@@ -85,25 +86,22 @@ class Register(Resource):
                 url = os.getenv('Url')
                 token = TokenGenaration.encode_token(self, user)
 
-                short = ShortUrlGenerator.short_url(self,10)
+                short = ShortUrlGenerator.short_url(self, 10)
 
                 token = Token(token=token, short=short)
                 db.session.add(token)
                 db.session.commit()
                 # characters=string.digits+string.ascii_letters
                 # short_url=''.join(choices(characters,k=5))
-
                 # link=self.query.filter(short_url=short_url).first()
                 mail_subject = 'link to activate the account'
                 msg = Message(mail_subject, sender=email, recipients=[MAIL_USERNAME])
-                msg.body = f"Click here to activate : {url}/short/{token}"
-
+                msg.body = f"Click here to activate : {url}/register/{short}"
                 mail.send(msg)
                 # status_code = flask.Response(status=200)
-                #
                 # return status_code
                 # return jsonify(smd, status=200)
-                return jsonify({'status': True, 'message': 'registration success'})
+                return jsonify({'status': True, 'message': 'mail sent for activating account'})
             else:
                 # return Response(
                 #     "The response body goes here",
@@ -111,7 +109,6 @@ class Register(Resource):
                 # )
                 # return make_response()
                 status_code = flask.Response(status=400)
-                #
                 return status_code
                 # return render_template('page_not_found.html'), 404
                 # return jsonify({'message': 'enter valid credentials', }, status=400)
@@ -124,7 +121,8 @@ class Register(Resource):
     def get(self, token, *args, **kwargs):
         try:
             # pdb.set_trace()
-
+            token_data = Token.query.filter_by(short=token).first()
+            token = token_data.token
             details = TokenGenaration.decode_token(self, token)
             email = details['mail']
             user_id = details['id']
@@ -135,7 +133,7 @@ class Register(Resource):
                 db.session.add(user)
                 db.session.commit()
                 # result = register_schema.dumps(user).data
-                flash({'message':"REGISTRATION SUCESSFUL"})
+
                 return jsonify({'status': True, 'message': 'account activation  success'})
 
             else:
@@ -179,7 +177,7 @@ class Login(Resource):
 
             return jsonify({'status': True, 'message': 'login suessfull ', 'data': []})
         except:
-            return flask.Response(status=200)
+            return flask.Response(status=400)
 
 
 api.add_resource(Login, '/login')
@@ -202,18 +200,20 @@ class ForgotPasword(Resource):
 
         # import pdb
         # pdb.set_trace()
-
-        form = ForgotPasswordForm()
-        email = form.email.data
-        user = User.query.filter_by(email=email).first()
-        if user:
-            url = os.getenv('Url')
-            token = TokenGenaration.encode_token(self, user)
-            mail_subject = 'link to activate the account'
-            msg = Message(mail_subject, sender=email, recipients=[MAIL_USERNAME])
-            msg.body = f"Click here to reset : {url}/forgot/{token}"
-            mail.send(msg)
-            return jsonify({'status': True, 'message': 'mail sent for reset ', 'data': token})
+        try:
+            form = ForgotPasswordForm()
+            email = form.email.data
+            user = User.query.filter_by(email=email).first()
+            if user:
+                url = os.getenv('Url')
+                token = TokenGenaration.encode_token(self, user)
+                mail_subject = 'link to activate the account'
+                msg = Message(mail_subject, sender=email, recipients=[MAIL_USERNAME])
+                msg.body = f"Click here to reset : {url}/forgot/{token}"
+                mail.send(msg)
+                return jsonify({'status': True, 'message': 'mail sent for reset ', 'data': token})
+        except:
+            return flask.Response(status=400)
 
     @cross_origin()
     def put(self):
@@ -225,7 +225,7 @@ class ForgotPasword(Resource):
             form = ResetPasswordForm()
 
             password = form.password.data
-            status=password_validators(password)
+            status = password_validators(password)
             if status:
                 confirm_password = form.password.data
                 details = TokenGenaration.decode_token(self, token)
@@ -261,7 +261,7 @@ class Logout(Resource):
 
     def post(self):
         logout_user()
-        return jsonify({'status': 200, 'message': 'reset suessfull ', 'data': []})
+        return jsonify({'status': 200, 'message': 'logout suessfull ', 'data': []})
 
 
 api.add_resource(Logout, '/logout')

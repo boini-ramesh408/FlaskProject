@@ -18,6 +18,6 @@ def validate_credentials(password, email):
 
 def password_validators(password):
     if re.match("(?=.*\d)(?=.*[a-z])(?=.*[A-Z]).{8,}", password):
-        return  True
+        return True
     else:
-        return  False
+        return False
