@@ -3,7 +3,7 @@ import pdb
 import flask
 from flask import jsonify, render_template, url_for, flash, session, make_response, request
 from flask_cors import cross_origin, CORS
-from flask_login import login_user, logout_user
+from flask_login import login_user, logout_user, LoginManager
 from flask_mail import Message, Mail
 from flask_migrate import Migrate
 from flask_restful import Resource, Api
@@ -22,6 +22,8 @@ migrate = Migrate(app, db)
 api = Api(app)
 migrate.init_app(app)
 CORS(app)
+login_manager = LoginManager()
+login_manager.init_app(app)
 MAIL_USERNAME = os.getenv('MAIL_USERNAME')
 MAIL_PASSWORD = os.getenv('MAIL_PASSWORD')
 DATABASE_URL = os.getenv('DATABASE_URL')
@@ -108,6 +110,7 @@ class Register(Resource):
                 #     status=400,
                 # )
                 # return make_response()
+                # return jsonify({'status': True, 'message': 'Error occured while activating account'})
                 status_code = flask.Response(status=400)
                 return status_code
                 # return render_template('page_not_found.html'), 404
@@ -170,12 +173,14 @@ class Login(Resource):
             if user.is_active == 1:
                 user_id = user.id
                 db.session.add(user)
-                db.session.commit()
-                # login_user(user)
-                # session['username'] = user.username
-                # session["email"] = user.email
 
-            return jsonify({'status': True, 'message': 'login suessfull ', 'data': []})
+                # login_user(user)
+                session['username'] = user.username
+                session["email"] = user.email
+
+                return jsonify({'status': True, 'message': 'login suessfull ', 'data': []})
+            else:
+                pass
         except:
             return flask.Response(status=400)
 
@@ -204,7 +209,9 @@ class ForgotPasword(Resource):
             form = ForgotPasswordForm()
             email = form.email.data
             user = User.query.filter_by(email=email).first()
+
             if user:
+
                 url = os.getenv('Url')
                 token = TokenGenaration.encode_token(self, user)
                 mail_subject = 'link to activate the account'
@@ -212,6 +219,8 @@ class ForgotPasword(Resource):
                 msg.body = f"Click here to reset : {url}/forgot/{token}"
                 mail.send(msg)
                 return jsonify({'status': True, 'message': 'mail sent for reset ', 'data': token})
+            else:
+                return flask.Response(status=400)
         except:
             return flask.Response(status=400)
 
