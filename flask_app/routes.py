@@ -116,7 +116,7 @@ class Register(Resource):
                 # return render_template('page_not_found.html'), 404
                 # return jsonify({'message': 'enter valid credentials', }, status=400)
         except:
-            status_code = flask.Response(status=405)
+            status_code = flask.Response(status=406)
             #
             return status_code
             # return jsonify({'status': False, 'message': 'registration failed'})
