@@ -116,7 +116,7 @@ class Register(Resource):
                 # return render_template('page_not_found.html'), 404
                 # return jsonify({'message': 'enter valid credentials', }, status=400)
         except:
-            status_code = flask.Response(status=401)
+            status_code = flask.Response(status=405)
             #
             return status_code
             # return jsonify({'status': False, 'message': 'registration failed'})
@@ -137,6 +137,8 @@ class Register(Resource):
                 db.session.commit()
                 # result = register_schema.dumps(user).data
 
+119
+            status_code = flask.Response(status=401
                 return jsonify({'status': True, 'message': 'account activation  success'})
 
             else:
@@ -187,6 +189,8 @@ class Login(Resource):
 
 api.add_resource(Login, '/login')
 
+119
+            status_code = flask.Response(status=401
 
 class ForgotPasword(Resource):
     """
@@ -202,6 +206,8 @@ class ForgotPasword(Resource):
 
     @cross_origin()
     def post(self):
+119
+            status_code = flask.Response(status=401
 
         # import pdb
         # pdb.set_trace()
