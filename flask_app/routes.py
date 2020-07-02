@@ -116,7 +116,7 @@ class Register(Resource):
                 # return render_template('page_not_found.html'), 404
                 # return jsonify({'message': 'enter valid credentials', }, status=400)
         except:
-            status_code = flask.Response(status=405)
+            status_code = flask.Response(status=406)
             #
             return status_code
             # return jsonify({'status': False, 'message': 'registration failed'})
@@ -158,7 +158,7 @@ class Login(Resource):
           --------
           post: Post API is used to for storing the login credentials in to the database if the user is active
 
-          """
+          """error: You have not concluded your merge (MERGE_HEAD exists)
 
     @cross_origin()
     def post(self, *args, **kwargs):
